@@ -28,11 +28,14 @@ const siteUrl = config.siteUrl.replace(/\/+$/, '');
 
 // Security Middleware
 // Allow images from https URLs (business logos / deal images) and inline data URIs.
+// Cloudflare Web Analytics is injected at the edge, so its script/beacon hosts are allowed.
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         imgSrc: ["'self'", 'data:', 'https:'],
+        scriptSrc: ["'self'", 'https://static.cloudflareinsights.com'],
+        connectSrc: ["'self'", 'https://cloudflareinsights.com'],
       },
     },
   })
@@ -47,7 +50,33 @@ app.use(limiter); // Apply to all requests
 
 // Middleware
 app.use(express.json()); // For parsing application/json
-app.use(cors()); // Enable CORS for all routes
+
+// CORS: only allow the DealPass production origins (plus the configured SITE_URL
+// and localhost for development). No wildcard.
+const allowedOrigins = new Set<string>([
+  'https://dealpass.app',
+  'https://www.dealpass.app',
+  siteUrl,
+]);
+if (process.env.NODE_ENV !== 'production') {
+  allowedOrigins.add('http://localhost:5173');
+  allowedOrigins.add('http://127.0.0.1:5173');
+  allowedOrigins.add('http://localhost:3000');
+  allowedOrigins.add('http://127.0.0.1:3000');
+}
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow same-origin / non-browser requests (no Origin header).
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
+    credentials: true,
+  })
+);
 
 // SEO: robots.txt and sitemap.xml are generated from SITE_URL
 app.get('/robots.txt', (req: Request, res: Response) => {
@@ -57,7 +86,7 @@ app.get('/robots.txt', (req: Request, res: Response) => {
 });
 
 app.get('/sitemap.xml', (req: Request, res: Response) => {
-  const staticPaths = ['/', '/offers', '/about', '/terms', '/agent-program', '/login', '/signup'];
+  const staticPaths = ['/', '/offers', '/about', '/terms', '/privacy', '/contact', '/agent-program', '/login', '/signup'];
   const urls = staticPaths
     .map((p) => `  <url><loc>${siteUrl}${p}</loc></url>`)
     .join('\n');
