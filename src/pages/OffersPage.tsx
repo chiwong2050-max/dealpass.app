@@ -10,7 +10,6 @@ import { useSearchParams } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import AdPlaceholder from '@/components/AdPlaceholder';
 import { useAuth } from '@/hooks/useAuth';
 
 const OffersPage = () => {
@@ -231,9 +230,6 @@ const OffersPage = () => {
           </div>
       </div>
       
-      {/* Top Ad */}
-      <AdPlaceholder slotId="offers-top-banner" className="mb-6" />
-
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -251,22 +247,9 @@ const OffersPage = () => {
       ) : (
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {offers.map((offer, index) => (
-                <React.Fragment key={offer.id}>
-                    <OfferCard offer={offer} />
-                    {/* Insert Ad every 8 cards */}
-                    {(index + 1) % 8 === 0 && (
-                        <div className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 flex justify-center py-4">
-                            <AdPlaceholder slotId={`feed-ad-${index}`} />
-                        </div>
-                    )}
-                </React.Fragment>
+            {offers.map((offer) => (
+                <OfferCard key={offer.id} offer={offer} />
             ))}
-            </div>
-            
-            {/* Bottom Ad */}
-            <div className="mt-8">
-                <AdPlaceholder slotId="offers-bottom-banner" />
             </div>
         </>
       )}

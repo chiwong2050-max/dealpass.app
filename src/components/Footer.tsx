@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Store, Heart, Users, BookOpen, Shield } from 'lucide-react';
+import { Store, Heart, Users, BookOpen, Shield, Coffee } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -19,6 +19,11 @@ const Footer = () => {
             <li>
                 <Link to="/terms" className="hover:text-primary">
                     Terms of Service
+                </Link>
+            </li>
+            <li>
+                <Link to="/privacy" className="hover:text-primary">
+                    Privacy Policy
                 </Link>
             </li>
           </ul>
@@ -44,6 +49,14 @@ const Footer = () => {
           <p className="text-sm text-gray-500">
             Need help? Chat with our AI Concierge on the bottom right.
           </p>
+          <a
+            href="https://buymeacoffee.com/aussieloo?ref=dealpass"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-2 text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+          >
+            <Coffee className="w-4 h-4" /> Buy me a coffee
+          </a>
           <div className="pt-2">
              <div className="flex items-center gap-2 text-xs text-gray-400">
                 <Shield className="w-3 h-3" /> Secure Platform

@@ -1,31 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import api from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Loader2, Star, ShieldCheck, TrendingUp, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { Check, Star, X, Info } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
 const UserSubscription = () => {
-  const { user, loadUser } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
-
-  const handleUpgrade = async () => {
-    setLoading(true);
-    try {
-      await api.post('/auth/upgrade');
-      await loadUser(); // Refresh user data
-      toast.success('Successfully upgraded to Premium Member!');
-    } catch (error: any) {
-      console.error('Upgrade failed:', error);
-      toast.error('Failed to upgrade subscription. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const isPremium = user?.userTier === 'PREMIUM';
 
@@ -36,6 +19,15 @@ const UserSubscription = () => {
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Members save an average of <span className="font-bold text-green-600">$450/year</span>.
         </p>
+      </div>
+
+      {/* Payments are not connected yet - make this clear instead of faking an upgrade. */}
+      <div className="max-w-2xl mx-auto mb-8 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+        <Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
+        <div className="text-sm">
+          <p className="font-semibold">Paid subscriptions coming soon</p>
+          <p>Online payments are not available yet, so upgrades are disabled for now.</p>
+        </div>
       </div>
 
       <div className="flex justify-center items-center gap-4 mb-8">
@@ -114,8 +106,8 @@ const UserSubscription = () => {
                 Active Plan
               </Button>
             ) : (
-              <Button className="w-full bg-gradient-to-r from-primary to-blue-700 hover:from-primary/90 hover:to-blue-700/90" onClick={handleUpgrade} disabled={loading}>
-                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Join the Club'}
+              <Button className="w-full" disabled>
+                Coming Soon
               </Button>
             )}
           </CardFooter>

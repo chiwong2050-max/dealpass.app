@@ -15,6 +15,9 @@ import { ApiError } from './utils/errors';
 
 const app = express();
 
+// Trust the first hop (nginx reverse proxy) so rate limiting sees the real client IP.
+app.set('trust proxy', 1);
+
 // Path to the built frontend (Vite output).
 // Resolves to <project-root>/dist for both src/app.ts (dev) and dist/app.js (build).
 const distPath = path.resolve(__dirname, '../../dist');
@@ -24,7 +27,16 @@ const serveFrontend = fs.existsSync(indexHtmlPath);
 const siteUrl = config.siteUrl.replace(/\/+$/, '');
 
 // Security Middleware
-app.use(helmet()); // Set secure HTTP headers
+// Allow images from https URLs (business logos / deal images) and inline data URIs.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+  })
+);
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
@@ -113,8 +125,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 const startServer = () => {
-  app.listen(config.port, () => {
-    console.log(`Server running on port ${config.port}`);
+  app.listen(config.port, config.host, () => {
+    console.log(`Server running on http://${config.host}:${config.port}`);
     console.log(`Access health check at http://localhost:${config.port}/api/health`);
     if (serveFrontend) {
       console.log(`Serving built frontend from ${distPath}`);

@@ -47,6 +47,7 @@ cp .env.example .env
 
 | Variable | Required | Description |
 | --- | --- | --- |
+| `HOST` | no | Interface to bind. Defaults to `127.0.0.1` (localhost). Keep the default when a reverse proxy fronts the app; set `0.0.0.0` only to expose the app directly. |
 | `PORT` | no | Port the server listens on. Defaults to `3000`. |
 | `SITE_URL` | yes | Public URL of the site (no trailing slash). Drives the **canonical link**, **`/sitemap.xml`** and **`/robots.txt`**. |
 | `DATABASE_URL` | yes | SQLite connection string. Defaults to `file:./data/dealpass.db`. The path is resolved relative to `backend/prisma/schema.prisma`. |
@@ -54,7 +55,10 @@ cp .env.example .env
 | `GEMINI_API_KEY` | no | Optional. Leave empty to keep the paid Gemini integration disabled. |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | no | Optional web-push keys. Leave empty to keep push disabled. |
 
-Paid/third-party services are **off by default**: the Google AdSense script has been removed and the AI/push integrations only activate when their keys are provided.
+> **Do not set `NODE_ENV` in `.env`** — Vite rejects it at build time. On the server,
+> let **systemd** set it via `Environment=NODE_ENV=production` (see the unit file below).
+
+Paid/third-party services are **off by default**: no ad code is shipped and the AI/push integrations only activate when their keys are provided. Online payments are **not connected yet** — the buy-credits and subscription screens are disabled and show a "coming soon" notice, while free credits and referrals keep working.
 
 ## Local development
 
@@ -118,4 +122,17 @@ WantedBy=multi-user.target
 | `npm run build` | Build the frontend with Vite into `./dist`. |
 | `npm run build:server` | Compile the backend TypeScript into `backend/dist`. |
 | `npm start` | Compile the backend then run the production server. |
+| `npm run make-admin -- user@email.com` | Promote an existing user to `ADMIN`. |
 | `npm test` | Run the Vitest test suite. |
+
+## Admin access
+
+There is no public way to create an admin. Promote an **existing** user (they must have
+signed up first) using the backend script:
+
+```bash
+npm run make-admin -- user@email.com
+```
+
+This looks the user up by email and sets their `role` to `ADMIN` in the database. The user
+can then reach the admin dashboard at `/admin/dashboard`.

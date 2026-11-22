@@ -7,9 +7,13 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const port = Number(process.env.PORT) || 3000;
+// Bind to 127.0.0.1 by default; a reverse proxy (nginx) forwards public traffic.
+// Set HOST=0.0.0.0 only if you intentionally want to expose the app directly.
+const host = process.env.HOST || '127.0.0.1';
 
 export const config = {
   port,
+  host,
   jwtSecret: process.env.JWT_SECRET,
   geminiApiKey: process.env.GEMINI_API_KEY,
   databaseUrl: process.env.DATABASE_URL,

@@ -1,39 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-// In a real app, you would import a payment gateway hook/component here
+import { Coins, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const BuyCredits = () => {
-  const { user, loadUser } = useAuth();
-  const [loading, setLoading] = useState(false);
-
-  const handleBuy = async (amount: number, cost: number) => {
-    setLoading(true);
-    // Simulate API call to process payment and add credits
-    try {
-      // For this demo, we'll just simulate a successful transaction
-      // In reality, this would be a POST to /api/credits/buy with payment token
-      
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Since we don't have a backend endpoint for this in the demo yet,
-      // we'll just show a success message. In a real app, the backend would update the balance.
-      toast.success(`Successfully purchased ${amount} credits for $${cost}! (Simulation)`);
-      
-      // We can't actually update the balance without a backend endpoint, 
-      // so we'll just refresh user data to show we tried.
-      await loadUser(); 
-      
-    } catch (error) {
-      toast.error('Transaction failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { user } = useAuth();
 
   const packages = [
     { credits: 10, cost: 2.99, popular: false, desc: "Unlock ~5 deals" },
@@ -48,6 +21,19 @@ const BuyCredits = () => {
         <p className="text-xl text-gray-600 dark:text-gray-400">
           Current Balance: <span className="font-bold text-primary">{user?.creditBalance} Credits</span>
         </p>
+      </div>
+
+      {/* Payments are not connected yet - make this clear instead of faking a purchase. */}
+      <div className="max-w-3xl mx-auto mb-8 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+        <Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
+        <div className="text-sm">
+          <p className="font-semibold">Paid credits coming soon</p>
+          <p>
+            Online payments are not available yet, so purchases are disabled. In the meantime you can
+            still earn credits for free by inviting friends and completing activities on the{' '}
+            <Link to="/earn-credits" className="font-medium underline">Earn Credits</Link> page.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -70,13 +56,12 @@ const BuyCredits = () => {
               <p className="text-sm text-muted-foreground">One-time payment</p>
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 variant={pkg.popular ? 'default' : 'outline'}
-                onClick={() => handleBuy(pkg.credits, pkg.cost)}
-                disabled={loading}
+                disabled
               >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Buy Now'}
+                Coming Soon
               </Button>
             </CardFooter>
           </Card>

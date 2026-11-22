@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AdPlaceholder from '@/components/AdPlaceholder';
 import { Badge } from '@/components/ui/badge';
 import { extractIdFromSlug } from '@/utils/slugs';
 import CreditExplainer from '@/components/CreditExplainer';
@@ -434,9 +433,6 @@ const OfferDetailsPage = () => {
               </div>
             )}
           </div>
-          
-          {/* Monetization / Ad Placeholder */}
-          <AdPlaceholder slotId="offer-details-bottom" />
           
         </CardContent>
       </Card>

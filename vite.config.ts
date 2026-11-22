@@ -10,7 +10,7 @@ export default defineConfig(() => ({
     port: 8080,
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: "http://127.0.0.1:3000",
         changeOrigin: true,
         secure: false,
       },
@@ -28,12 +28,12 @@ export default defineConfig(() => ({
         enabled: true,
         type: 'module',
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'DealPass',
         short_name: 'DealPass',
         description: 'Unlock exclusive local deals and savings.',
-        theme_color: '#ffffff',
+        theme_color: '#0f172a',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
@@ -51,10 +51,10 @@ export default defineConfig(() => ({
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-maskable-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'maskable'
           }
         ],
         categories: ["shopping", "lifestyle", "food"],

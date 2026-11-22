@@ -1,31 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import api from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Loader2, Star, X, Briefcase, Handshake, Sparkles, TrendingUp, Crown } from 'lucide-react';
-import { toast } from 'sonner';
+import { Check, Star, Handshake, Sparkles, TrendingUp, Crown, Info } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
 const BusinessSubscription = () => {
-  const { user, loadUser } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-
-  const handleUpgrade = async () => {
-    setLoading(true);
-    try {
-      await api.post('/businesses/upgrade');
-      await loadUser();
-      toast.success('Successfully upgraded to Featured Partner!');
-    } catch (error: any) {
-      console.error('Upgrade failed:', error);
-      toast.error('Failed to upgrade. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const isPro = user?.userTier === 'PREMIUM';
 
@@ -36,6 +19,15 @@ const BusinessSubscription = () => {
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Melbourne Launch Special: First 50 partners join free forever (Foundation Status).
         </p>
+      </div>
+
+      {/* Payments are not connected yet - make this clear instead of faking an upgrade. */}
+      <div className="max-w-2xl mx-auto mb-8 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+        <Info className="mt-0.5 h-5 w-5 flex-shrink-0" />
+        <div className="text-sm">
+          <p className="font-semibold">Paid plans coming soon</p>
+          <p>The free Foundation Partner plan is active. Paid upgrades are disabled until online payments are available.</p>
+        </div>
       </div>
 
       <div className="flex justify-center items-center gap-4 mb-8">
@@ -133,8 +125,8 @@ const BusinessSubscription = () => {
                     Active Plan
                 </Button>
                 ) : (
-                <Button className="w-full" onClick={handleUpgrade} disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Upgrade to Featured'}
+                <Button className="w-full" disabled>
+                    Coming Soon
                 </Button>
                 )}
             </CardFooter>
