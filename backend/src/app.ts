@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import { config } from './config';
@@ -40,13 +40,53 @@ app.use(
     },
   })
 );
-const limiter = rateLimit({
+// Resolve the true visitor IP. Behind Cloudflare (and nginx) the edge sets
+// CF-Connecting-IP / X-Real-IP, so we key limits per visitor rather than per
+// proxy hop (otherwise one shared proxy IP would throttle everyone).
+const clientIp = (req: Request): string => {
+  const cf = req.headers['cf-connecting-ip'];
+  const real = req.headers['x-real-ip'];
+  const raw =
+    (Array.isArray(cf) ? cf[0] : cf) ||
+    (Array.isArray(real) ? real[0] : real) ||
+    req.ip ||
+    req.socket.remoteAddress ||
+    '';
+  // Normalize IPv6 to its subnet so limits cannot be bypassed by rotating addresses.
+  return raw ? ipKeyGenerator(raw) : 'unknown';
+};
+
+// API rate limiter. Only throttles API traffic: page loads, static assets and
+// the health check are skipped so normal visitors are never blocked.
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 400, // Limit each visitor to 400 API requests per windowMs
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: clientIp,
+  skip: (req: Request) => {
+    const method = req.method.toUpperCase();
+    // Skip non-API GET/HEAD requests (pages, SPA routes, static assets).
+    if ((method === 'GET' || method === 'HEAD') && !req.path.startsWith('/api')) {
+      return true;
+    }
+    // Always allow static assets and the health check.
+    if (req.path.startsWith('/assets/') || req.path === '/api/health') {
+      return true;
+    }
+    return false;
+  },
 });
-app.use(limiter); // Apply to all requests
+app.use(apiLimiter); // Apply to all requests
+
+// Stricter limiter for authentication endpoints (login / signup / etc.).
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each visitor to 30 auth requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: clientIp,
+});
 
 // Middleware
 app.use(express.json()); // For parsing application/json
@@ -98,7 +138,7 @@ app.get('/sitemap.xml', (req: Request, res: Response) => {
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/businesses', businessRoutes); // Use business routes
 app.use('/api/settings', settingsRoutes); // Use settings routes
