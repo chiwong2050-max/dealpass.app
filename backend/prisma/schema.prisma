@@ -49,6 +49,8 @@ model Business {
   address       String?
   city          String
   country       String
+  currency      String   @default("USD")
+  timezone      String   @default("UTC")
   phone         String?
   email         String
   website       String?
@@ -75,6 +77,10 @@ model Offer {
   longDescription          String?
   imageUrl                 String?
   externalUrl              String?
+  country                  String?
+  city                     String?
+  currency                 String?
+  timezone                 String?
   creditCost               Int      @default(1)
   leadCost                 Int      @default(0)
   validFrom                DateTime

@@ -23,7 +23,7 @@ When they redeem the offer, we record it, so you can see exactly how many people
 
 It’s like a smarter, digital version of the old coupon books, but easier for you and your customers.`,
 
-    melbourneRestaurant: `Hi [Name], I'm a local here in Melbourne. I help restaurants fill their empty tables during the mid-week lull (like Tuesday-Wednesday nights).
+    localRestaurant: `Hi [Name], I'm a local partner in your area. I help restaurants fill their empty tables during the mid-week lull (like Tuesday-Wednesday nights).
 
 I don't sell ads. I actually build a "private club" promotion for you inside my app, DealPass. 
 
@@ -94,9 +94,9 @@ It's automatic. You don't need to build an email list. We do the retargeting for
                   </CardHeader>
                   <CardContent className="space-y-6">
                       <div className="bg-muted p-6 rounded-lg border shadow-sm text-base leading-relaxed whitespace-pre-wrap">
-                          {scripts.melbourneRestaurant}
+                          {scripts.localRestaurant}
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => copyToClipboard(scripts.melbourneRestaurant)}>
+                      <Button variant="outline" className="w-full" onClick={() => copyToClipboard(scripts.localRestaurant)}>
                           <Copy className="mr-2 h-4 w-4" /> Copy Script
                       </Button>
                   </CardContent>

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 
 const BusinessSubscription = () => {
   const { user } = useAuth();
-  const { region } = useRegion();
+  const { region, formatCurrency } = useRegion();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const isPro = user?.userTier === 'PREMIUM';
@@ -60,7 +60,7 @@ const BusinessSubscription = () => {
             <CardContent className="space-y-4 flex-grow">
                 <div>
                     <div className="text-4xl font-bold text-green-600">
-                        $0
+                        {formatCurrency(0)}
                         <span className="text-lg font-normal text-gray-500">/forever*</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">*Lock in this rate by creating 1 offer today.</p>
@@ -99,7 +99,7 @@ const BusinessSubscription = () => {
             <CardContent className="space-y-4 flex-grow">
                  <div>
                     <div className="text-4xl font-bold">
-                        {billingCycle === 'monthly' ? '$69' : '$499'}
+                        {formatCurrency(billingCycle === 'monthly' ? 69 : 499)}
                         <span className="text-lg font-normal text-gray-500">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
@@ -152,7 +152,7 @@ const BusinessSubscription = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-2">
-                        $199 <span className="text-sm font-normal text-gray-500">one-time</span>
+                        {formatCurrency(199)} <span className="text-sm font-normal text-gray-500">one-time</span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
                         Don't have time? A local City Manager will visit, take professional photos, write your copy, and configure your offers.
@@ -169,7 +169,7 @@ const BusinessSubscription = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-2">
-                        $5 <span className="text-sm font-normal text-gray-500">per visit</span>
+                        {formatCurrency(5)} <span className="text-sm font-normal text-gray-500">per visit</span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
                         Optional: Set a "bounty" on your offer. You only pay when a customer actually redeems the coupon in-store. Zero risk.

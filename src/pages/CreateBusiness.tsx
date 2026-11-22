@@ -6,19 +6,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Store, MapPin, Globe, Phone, Mail, UserCheck, Clock } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Store, MapPin, Globe, Phone, Mail, UserCheck, Clock, Navigation } from 'lucide-react';
 import { toast } from 'sonner';
+import { REGIONS } from '@/config/regions';
+import { useRegion } from '@/contexts/RegionContext';
 
 const CreateBusiness = () => {
   const navigate = useNavigate();
+  const { region, city: regionCity, setCity } = useRegion();
   const [loading, setLoading] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
   const [formData, setFormData] = useState({
     legalName: '',
     tradingName: '',
     description: '',
     address: '',
-    city: '',
-    country: '',
+    city: regionCity || '',
+    country: region.code === 'OTHER' ? '' : region.code,
     phone: '',
     email: '',
     website: '',
@@ -33,6 +38,28 @@ const CreateBusiness = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Fill the city from the visitor's device location (timezone-derived place name).
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported on this device.');
+      return;
+    }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        const detected = regionCity || '';
+        setFormData(prev => ({ ...prev, city: detected }));
+        setCity(detected);
+        toast.success(detected ? `Located: ${detected}` : 'Location detected.');
+        setGeoLoading(false);
+      },
+      () => {
+        toast.error('Unable to retrieve your location.');
+        setGeoLoading(false);
+      }
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -40,8 +67,13 @@ const CreateBusiness = () => {
     // Concatenate opening hours into description for now as schema support is limited in MVP
     const fullDescription = `${formData.description}\n\nOPENING HOURS:\n${formData.openingHours}`;
 
+    const selectedRegion = REGIONS[formData.country];
+
     const payload = {
         ...formData,
+        // Store the connection's country/currency/timezone alongside the free-text city.
+        currency: selectedRegion?.currency || 'USD',
+        timezone: selectedRegion?.timezone || 'UTC',
         description: fullDescription,
         categoryTags: formData.categoryTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
     };
@@ -160,25 +192,47 @@ const CreateBusiness = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">City <span className="text-red-500">*</span></Label>
-                  <Input
-                    id="city"
-                    name="city"
-                    placeholder="New York"
-                    value={formData.city}
-                    onChange={handleChange}
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="city"
+                      name="city"
+                      placeholder="e.g. New York"
+                      value={formData.city}
+                      onChange={handleChange}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleUseLocation}
+                      disabled={geoLoading}
+                      title="Use my location"
+                    >
+                      {geoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Navigation className="h-4 w-4" />}
+                      <span className="ml-2 hidden sm:inline">Use my location</span>
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="country">Country <span className="text-red-500">*</span></Label>
-                  <Input
-                    id="country"
-                    name="country"
-                    placeholder="USA"
+                  <Select
                     value={formData.country}
-                    onChange={handleChange}
-                    required
-                  />
+                    onValueChange={(value) => {
+                      setFormData(prev => ({ ...prev, country: value }));
+                      toast.success(`Selected: ${REGIONS[value]?.name || value}`);
+                    }}
+                  >
+                    <SelectTrigger id="country">
+                      <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(REGIONS).map((r) => (
+                        <SelectItem key={r.code} value={r.code}>
+                          {r.flag} {r.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

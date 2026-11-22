@@ -78,7 +78,7 @@ export const createOffer = async (req: Request, res: Response, next: NextFunctio
     if (!business) return next(new BadRequestError('You must own a business.'));
     if (business.status !== 'ACTIVE' && business.status !== 'PENDING_APPROVAL') return next(new BadRequestError('Business not active.'));
 
-    const { title, shortDescription, longDescription, imageUrl, externalUrl, creditCost, leadCost, validFrom, validTo, totalLimit, dailyLimit, perUserLimit, primaryPromotionTypeCode, discountDetails, timeDetails, eligibilityDetails, status } = req.body;
+    const { title, shortDescription, longDescription, imageUrl, externalUrl, country, city, currency, timezone, creditCost, leadCost, validFrom, validTo, totalLimit, dailyLimit, perUserLimit, primaryPromotionTypeCode, discountDetails, timeDetails, eligibilityDetails, status } = req.body;
 
     const moderation = await moderateOfferContent(title, shortDescription + (longDescription || ''), parseInt(creditCost));
     const finalTitle = moderation.suggestedTitle || title;
@@ -91,6 +91,12 @@ export const createOffer = async (req: Request, res: Response, next: NextFunctio
     const newOffer = await prisma.offer.create({
       data: {
         businessId: business.id, title: finalTitle, shortDescription, longDescription, imageUrl, externalUrl,
+        // Location defaults to the business's location when not supplied, so every
+        // offer always carries a country/city/currency/timezone for filtering & pricing.
+        country: country || business.country,
+        city: city || business.city,
+        currency: currency || business.currency,
+        timezone: timezone || business.timezone,
         creditCost: parseInt(creditCost), leadCost: leadCost ? parseInt(leadCost) : 0, validFrom: new Date(validFrom), validTo: new Date(validTo),
         totalLimit: totalLimit ? parseInt(totalLimit) : null, dailyLimit: dailyLimit ? parseInt(dailyLimit) : null,
         perUserLimit: perUserLimit ? parseInt(perUserLimit) : 1, primaryPromotionTypeCode, status: offerStatus as any,
@@ -172,26 +178,42 @@ export const deleteOffer = async (req: Request, res: Response, next: NextFunctio
 
 export const listOffers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { city, category, keyword, sort, day, page = 1, limit = 10, businessId } = req.query;
+    const { city, country, category, keyword, sort, day, page = 1, limit = 10, businessId } = req.query;
     const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
     const where: any = { status: STATUS_ACTIVE, validFrom: { lte: new Date() }, validTo: { gte: new Date() } };
 
-    if (city) where.business = { city: { equals: city as string } }; // Removed insensitive for SQLite
+    // Filter by the visitor's selected country/city. The country is matched on the
+    // offer's own country and falls back to the business country for older rows.
+    if (country) {
+        where.OR = [
+            { country: { equals: country as string } },
+            { country: null, business: { country: { equals: country as string } } },
+        ];
+    }
+    if (city) {
+        where.business = { ...where.business, city: { equals: city as string } };
+    }
     if (category) where.business = { ...where.business, categoryTags: { contains: category as string } };
-    if (keyword) where.OR = [{ title: { contains: keyword as string } }, { business: { tradingName: { contains: keyword as string } } }];
+    if (keyword) {
+        where.AND = [
+            ...(where.AND || []),
+            { OR: [{ title: { contains: keyword as string } }, { business: { tradingName: { contains: keyword as string } } }] },
+        ];
+    }
     if (businessId) {
         where.businessId = businessId as string;
     }
     
     if (day) {
         where.AND = [
+            ...(where.AND || []),
             {
                 OR: [
                     { validDays: { contains: day as string } },
                     { validDays: null },
                     { validDays: "" }
                 ]
-            }
+            },
         ];
     }
 
@@ -200,7 +222,7 @@ export const listOffers = async (req: Request, res: Response, next: NextFunction
     if (sort === 'ending_soon') orderBy = { validTo: 'asc' };
 
     const offers = await prisma.offer.findMany({
-      where, include: { business: { select: { id: true, tradingName: true, city: true, logoUrl: true, avgStarRating: true } } },
+      where, include: { business: { select: { id: true, tradingName: true, city: true, country: true, currency: true, logoUrl: true, avgStarRating: true } } },
       orderBy, skip, take: parseInt(limit as string)
     });
     const total = await prisma.offer.count({ where });
@@ -242,6 +264,7 @@ export const getOfferDetails = async (req: Request, res: Response, next: NextFun
         business: {
           select: {
             id: true, tradingName: true, description: true, address: true, city: true, country: true,
+            currency: true, timezone: true,
             logoUrl: true, coverImageUrl: true, avgStarRating: true, totalReviews: true, categoryTags: true, ownerUserId: true
           },
         },

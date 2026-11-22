@@ -6,16 +6,17 @@ import { Loader2, Search, SlidersHorizontal, Utensils, Sparkles, Wrench, Palmtre
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useRegion } from '@/contexts/RegionContext';
+import { detectCityFromTimezone } from '@/config/regions';
 
 const OffersPage = () => {
   const { user } = useAuth();
-  const { region } = useRegion();
+  const { countryCode, city } = useRegion();
   const [searchParams] = useSearchParams();
   const initialCity = searchParams.get('city') || '';
   
@@ -26,7 +27,7 @@ const OffersPage = () => {
   
   // Search States
   const [searchTerm, setSearchTerm] = useState('');
-  const [locationTerm, setLocationTerm] = useState(initialCity);
+  const [locationTerm, setLocationTerm] = useState(initialCity || city || '');
   const [geoLoading, setGeoLoading] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
   
@@ -67,6 +68,8 @@ const OffersPage = () => {
       
       if (searchTerm) params.append('keyword', searchTerm);
       if (currentLoc) params.append('city', currentLoc);
+      // Restrict results to the visitor's selected country.
+      if (countryCode && countryCode !== 'OTHER') params.append('country', countryCode);
       if (currentSort) params.append('sort', currentSort);
       
       // Calculate current day short name (Mon, Tue, etc.)
@@ -103,7 +106,7 @@ const OffersPage = () => {
 
   useEffect(() => {
       fetchOffers();
-  }, [activeCategory, sortBy, validToday]); // Re-fetch when these change
+  }, [activeCategory, sortBy, validToday, countryCode]); // Re-fetch when these change
 
   const handleSearch = (e: React.FormEvent) => {
       e.preventDefault();
@@ -129,7 +132,9 @@ const OffersPage = () => {
     navigator.geolocation.getCurrentPosition(
         async (position) => {
             try {
-                const detectedCity = region.cities[0]; 
+                // Use the visitor's selected city, falling back to the
+                // timezone-derived place name when none is set.
+                const detectedCity = city || detectCityFromTimezone();
                 setLocationTerm(detectedCity);
                 toast.success(`Located: ${detectedCity}`);
                 // Will trigger fetch via locationTerm effect if I had one, but manual trigger here is safer
@@ -243,8 +248,13 @@ const OffersPage = () => {
          </div>
       ) : offers.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-xl text-gray-500 mb-4">No offers found matching your criteria.</p>
-          <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
+          <p className="text-xl text-gray-500 mb-4">No deals here yet - be the first business to list one</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button asChild>
+              <Link to="/create-business">List your business</Link>
+            </Button>
+            <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
+          </div>
         </div>
       ) : (
         <>

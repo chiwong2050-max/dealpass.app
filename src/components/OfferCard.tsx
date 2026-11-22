@@ -3,17 +3,21 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Offer } from '@/types';
-import { Tag, DollarSign, Clock, Zap, Lock, Crown, Star, Heart } from 'lucide-react';
+import { Tag, DollarSign, Clock, Zap, Lock, Crown, Star, Heart, Gift } from 'lucide-react';
 import { format } from 'date-fns';
+import { useRegion } from '@/contexts/RegionContext';
 
 interface OfferCardProps {
   offer: Offer;
 }
 
 const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
+  const { formatCurrency } = useRegion();
   const validToDate = new Date(offer.validTo);
   const isValid = new Date() < validToDate;
   const isFree = offer.creditCost === 0;
+  // Rough indication of the deal's worth, shown in the offer's own currency.
+  const estimatedValue = offer.creditCost > 0 ? offer.creditCost * 2 : 10;
   
   // Logic for "Local Hero" / Favorite
   const isLocalHero = (offer.business?.avgStarRating || 0) >= 4.5;
@@ -83,9 +87,15 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
       <CardContent className="space-y-2 text-sm text-gray-600 dark:text-gray-300 flex-grow pt-0">
         <p className="line-clamp-2 text-sm">{offer.shortDescription}</p>
         
-        <div className="flex items-center text-xs text-muted-foreground mt-2 pt-2 border-t border-dashed">
-          <Clock className="mr-1.5 h-3.5 w-3.5" />
-          <span>Expires {format(validToDate, 'MMM d')}</span>
+        <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 pt-2 border-t border-dashed">
+          <span className="flex items-center">
+            <Clock className="mr-1.5 h-3.5 w-3.5" />
+            Expires {format(validToDate, 'MMM d')}
+          </span>
+          <span className="flex items-center font-medium text-green-700 dark:text-green-500">
+            <Gift className="mr-1 h-3.5 w-3.5" />
+            Worth ~{formatCurrency(estimatedValue, offer.currency)}
+          </span>
         </div>
       </CardContent>
       

@@ -172,14 +172,16 @@ const AdminDashboard = () => {
           });
       }
 
-      // 4. Growth Insight
-      const melbourneUsers = users.filter(u => u.city === 'Melbourne' || !u.city).length;
-      if (melbourneUsers > 5) {
+      // 4. Growth Insight - most active city by user count (works worldwide)
+      const cityCounts: Record<string, number> = {};
+      users.forEach(u => { if (u.city) cityCounts[u.city] = (cityCounts[u.city] || 0) + 1; });
+      const topCity = Object.entries(cityCounts).sort((a, b) => b[1] - a[1])[0];
+      if (topCity && topCity[1] > 5) {
           newInsights.push({
               id: 'growth_city',
               type: 'success',
-              title: 'High Growth in Melbourne',
-              description: `Melbourne user base grew by 15% this week. Total: ${melbourneUsers} users.`,
+              title: `High Growth in ${topCity[0]}`,
+              description: `${topCity[0]} is your most active city with ${topCity[1]} users.`,
           });
       }
 

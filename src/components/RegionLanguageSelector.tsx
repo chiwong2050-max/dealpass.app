@@ -41,7 +41,7 @@ const RegionLanguageSelector = () => {
                     <span className="text-2xl">{r.flag}</span>
                     <div className="flex flex-col">
                         <span className="font-medium">{r.name}</span>
-                        <span className="text-xs text-muted-foreground">{r.cities.slice(0, 2).join(', ')}...</span>
+                        <span className="text-xs text-muted-foreground">{r.currency}</span>
                     </div>
                 </span>
                 {region.code === r.code && <Check className="w-4 h-4 text-primary" />}

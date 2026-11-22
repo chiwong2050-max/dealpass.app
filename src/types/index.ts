@@ -50,6 +50,10 @@ export interface Offer {
   longDescription?: string;
   imageUrl?: string;
   externalUrl?: string;
+  country?: string;
+  city?: string;
+  currency?: string;
+  timezone?: string;
   creditCost: number;
   leadCost: number; // New field
   status: OfferStatus;

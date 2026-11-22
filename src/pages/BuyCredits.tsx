@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Coins, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useRegion } from '@/contexts/RegionContext';
 
 const BuyCredits = () => {
   const { user } = useAuth();
+  const { formatCurrency } = useRegion();
 
   const packages = [
     { credits: 10, cost: 2.99, popular: false, desc: "Unlock ~5 deals" },
@@ -52,7 +54,7 @@ const BuyCredits = () => {
               <CardDescription>{pkg.desc}</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-4xl font-bold mb-2">${pkg.cost}</div>
+              <div className="text-4xl font-bold mb-2">{formatCurrency(pkg.cost)}</div>
               <p className="text-sm text-muted-foreground">One-time payment</p>
             </CardContent>
             <CardFooter>

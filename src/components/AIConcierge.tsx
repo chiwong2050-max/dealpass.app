@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import api from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
+import { useRegion } from '@/contexts/RegionContext';
 import { Link } from 'react-router-dom';
 
 interface Message {
@@ -21,6 +22,7 @@ type ChatState = 'idle' | 'report_biz_offer' | 'report_time' | 'report_details';
 
 const AIConcierge = () => {
   const { isAuthenticated, user } = useAuth();
+  const { city: regionCity } = useRegion();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
@@ -54,10 +56,12 @@ const AIConcierge = () => {
       if (lower.includes('kid') || lower.includes('family') || lower.includes('fun')) category = 'Fun';
       if (lower.includes('gym') || lower.includes('fitness')) category = 'Fitness';
 
+      // Location intent: use the visitor's selected city instead of hardcoding
+      // any single country's cities, so this works worldwide.
       let city = '';
-      if (lower.includes('melbourne')) city = 'Melbourne';
-      if (lower.includes('sydney')) city = 'Sydney';
-      if (lower.includes('geelong')) city = 'Geelong';
+      if (lower.includes('near me') || lower.includes('nearby') || lower.includes('around here')) {
+          city = regionCity || user?.city || '';
+      }
 
       // 2. Fetch User History for "Personalization" simulation
       let personalizationMsg = "";

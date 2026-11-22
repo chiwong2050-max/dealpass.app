@@ -3,13 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { MapPin, Search, ChevronRight, Store, ArrowRight, LayoutDashboard, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useRegion } from "@/contexts/RegionContext";
 import Footer from "@/components/Footer";
 import RegionLanguageSelector from "@/components/RegionLanguageSelector";
 
 const Index = () => {
   const { isAuthenticated, user } = useAuth();
-  const { region } = useRegion();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -45,7 +43,7 @@ const Index = () => {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Food & Fun.</span>
               </h1>
               <p className="text-xl text-gray-500 max-w-md mx-auto leading-relaxed">
-                  Unlock 2-for-1 meals and 50% off local activities in <strong>{region.name}</strong>. Join the club.
+                  Unlock 2-for-1 meals and 50% off local activities near you. Join the club.
               </p>
               
               <Link to="/offers">
@@ -82,7 +80,7 @@ const Index = () => {
                   <div className="text-center space-y-2">
                       <div className="w-12 h-12 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center text-xl shadow-sm mx-auto">1</div>
                       <h3 className="font-bold">Browse</h3>
-                      <p className="text-sm text-gray-500">Find exclusive {region.name} offers.</p>
+                      <p className="text-sm text-gray-500">Find exclusive local offers.</p>
                   </div>
                   <div className="text-center space-y-2">
                       <div className="w-12 h-12 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center text-xl shadow-sm mx-auto">2</div>
@@ -146,7 +144,7 @@ const Index = () => {
 
           {!isAuthenticated && (
               <div className="text-center pt-8">
-                  <p className="text-gray-500 mb-4">Join locals saving money in {region.name}.</p>
+                  <p className="text-gray-500 mb-4">Join locals saving money near you.</p>
                   <Link to="/signup">
                       <Button variant="outline" className="w-full max-w-xs h-12 text-lg border-2">Create Free Account</Button>
                   </Link>

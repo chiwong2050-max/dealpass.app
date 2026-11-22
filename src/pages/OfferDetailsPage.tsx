@@ -15,12 +15,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { extractIdFromSlug } from '@/utils/slugs';
 import CreditExplainer from '@/components/CreditExplainer';
+import { useRegion } from '@/contexts/RegionContext';
 
 const OfferDetailsPage = () => {
   const { id, slugId } = useParams<{ id?: string, slugId?: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated, user, loading: authLoading } = useAuth();
+  const { formatCurrency } = useRegion();
   const [offer, setOffer] = useState<Offer | null>(null);
   const [userHistory, setUserHistory] = useState<{ visitCount: number, isReturningCustomer: boolean } | null>(null);
   const [usageStats, setUsageStats] = useState<{ todaysUnlocks: number } | null>(null);
@@ -280,7 +282,7 @@ const OfferDetailsPage = () => {
             </div>
             <div className="flex items-center text-green-700 font-medium">
               <Gift className="mr-3 h-6 w-6" />
-              <span>Est. Value: ~${estimatedValue}</span>
+              <span>Est. Value: ~{formatCurrency(estimatedValue, offer.currency)}</span>
             </div>
             
             {hasTimeRestrictions && (
