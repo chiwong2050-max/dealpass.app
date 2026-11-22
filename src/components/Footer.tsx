@@ -5,7 +5,7 @@ import { Store, Heart, Users, BookOpen, Shield, Coffee } from 'lucide-react';
 const Footer = () => {
   return (
     <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 pt-12 pb-24 md:pb-12 px-6">
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
         
         {/* Col 1: Company */}
         <div className="space-y-4">
@@ -67,6 +67,53 @@ const Footer = () => {
                 <Shield className="w-3 h-3" /> Secure Platform
              </div>
           </div>
+        </div>
+
+        {/* Col 4: Our other free apps */}
+        <div className="space-y-4">
+          <h4 className="font-bold text-gray-900 dark:text-white">Our other free apps</h4>
+          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <li>
+                <a
+                    href="https://listnear.app/?ref=dealpass"
+                    target="_blank"
+                    rel="noopener"
+                    className="hover:text-primary"
+                >
+                    ListNear <span className="text-gray-400 dark:text-gray-500">— free classifieds</span>
+                </a>
+            </li>
+            <li>
+                <a
+                    href="https://beatavo.com/?ref=dealpass"
+                    target="_blank"
+                    rel="noopener"
+                    className="hover:text-primary"
+                >
+                    Beatavo
+                </a>
+            </li>
+            <li>
+                <a
+                    href="https://localusa.app/?ref=dealpass"
+                    target="_blank"
+                    rel="noopener"
+                    className="hover:text-primary"
+                >
+                    LocalUSA
+                </a>
+            </li>
+            <li>
+                <a
+                    href="https://australiaweb.net/?ref=dealpass"
+                    target="_blank"
+                    rel="noopener"
+                    className="hover:text-primary"
+                >
+                    Australia Web
+                </a>
+            </li>
+          </ul>
         </div>
       </div>
       

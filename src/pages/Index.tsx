@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MapPin, Search, ChevronRight, Store, ArrowRight, LayoutDashboard, TrendingUp } from "lucide-react";
+import { MapPin, Search, ChevronRight, Store, ArrowRight, LayoutDashboard, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Footer from "@/components/Footer";
 import RegionLanguageSelector from "@/components/RegionLanguageSelector";
@@ -109,10 +109,21 @@ const Index = () => {
                       <p className="text-gray-400 text-lg">
                           Stop paying for clicks. List exclusive offers for off-peak times and only give discounts to customers who actually walk in.
                       </p>
+                      <ul className="space-y-3 pt-2">
+                          <li className="flex items-center gap-3 text-gray-200">
+                              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" /> Free to list
+                          </li>
+                          <li className="flex items-center gap-3 text-gray-200">
+                              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" /> New customers
+                          </li>
+                          <li className="flex items-center gap-3 text-gray-200">
+                              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" /> Simple QR redemption
+                          </li>
+                      </ul>
                       <div className="flex flex-col sm:flex-row gap-4 pt-2">
                           <Link to="/create-business">
                               <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 font-bold w-full sm:w-auto">
-                                  List My Business
+                                  List your business free
                               </Button>
                           </Link>
                           <Link to="/partner-resources">

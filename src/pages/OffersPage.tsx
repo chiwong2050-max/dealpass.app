@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '@/services/api';
 import { Offer } from '@/types';
 import OfferCard from '@/components/OfferCard';
-import { Loader2, Search, SlidersHorizontal, Utensils, Sparkles, Wrench, Palmtree, Dumbbell, Ticket, MapPin, Navigation, ArrowDownUp, CalendarCheck } from 'lucide-react';
+import { Loader2, Search, SlidersHorizontal, Utensils, Sparkles, Wrench, Palmtree, Dumbbell, Ticket, MapPin, Navigation, ArrowDownUp, CalendarCheck, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -120,6 +120,27 @@ const OffersPage = () => {
       setSortBy('newest');
       setValidToday(false);
       window.location.href = '/offers'; 
+  };
+
+  // Encourage a visitor to invite a local business to DealPass. Uses the native
+  // Web Share API where available and falls back to copying the link.
+  const handleTellBusiness = async () => {
+    const url = `${window.location.origin}/create-business`;
+    const shareData = {
+      title: 'DealPass',
+      text: 'DealPass helps local businesses win new customers with free deals. List yours free!',
+      url,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard');
+      }
+    } catch (err) {
+      // The visitor dismissed the share sheet - nothing to do.
+    }
   };
 
   const handleNearMe = () => {
@@ -247,14 +268,20 @@ const OffersPage = () => {
             <Button variant="link" onClick={clearFilters}>Try again</Button>
          </div>
       ) : offers.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-xl text-gray-500 mb-4">No deals here yet - be the first business to list one</p>
+        <div className="text-center py-20 max-w-lg mx-auto">
+          <p className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No deals here yet.</p>
+          <p className="text-lg text-gray-500 mb-6">Own a local business? List your first deal free</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button asChild>
-              <Link to="/create-business">List your business</Link>
+            <Button asChild size="lg" className="h-14 px-8 text-lg font-bold">
+              <Link to="/create-business">List your business free</Link>
             </Button>
-            <Button variant="outline" onClick={clearFilters}>Clear Filters</Button>
+            <Button variant="outline" size="lg" className="h-14 px-6" onClick={handleTellBusiness}>
+              <Share2 className="w-5 h-5 mr-2" /> Tell a local business about DealPass
+            </Button>
           </div>
+          <Button variant="link" onClick={clearFilters} className="mt-4">
+            Clear Filters
+          </Button>
         </div>
       ) : (
         <>
