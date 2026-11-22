@@ -89,7 +89,7 @@ const PushNotificationManager = () => {
                 </div>
                 <div>
                     <p className="font-bold text-sm">Don't miss out</p>
-                    <p className="text-[10px] text-gray-500">Get alerts for new Melbourne deals.</p>
+                    <p className="text-[10px] text-gray-500">Get alerts for new deals near you.</p>
                 </div>
             </div>
             <Button size="sm" onClick={subscribeToPush} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">

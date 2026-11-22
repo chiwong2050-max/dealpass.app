@@ -146,7 +146,7 @@ const Index = () => {
 
           {!isAuthenticated && (
               <div className="text-center pt-8">
-                  <p className="text-gray-500 mb-4">Join 10,000+ locals saving money.</p>
+                  <p className="text-gray-500 mb-4">Join locals saving money in {region.name}.</p>
                   <Link to="/signup">
                       <Button variant="outline" className="w-full max-w-xs h-12 text-lg border-2">Create Free Account</Button>
                   </Link>

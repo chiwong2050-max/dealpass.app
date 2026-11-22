@@ -8,13 +8,16 @@ const router = Router();
 
 // Public routes
 router.get('/', listOffers);
-router.get('/:id', optionalProtect, getOfferDetails); // CHANGED to optionalProtect
 
-// Protected routes
-router.get('/user/recommended', protect, getRecommendedOffers); // NEW
+// Specific routes must be registered BEFORE the '/:id' catch-all, otherwise
+// Express would match e.g. '/my-coupons' as an offer id.
+router.get('/user/recommended', protect, getRecommendedOffers);
 router.get('/my-coupons', protect, getMyUnlockedOffers);
 router.get('/business/:businessId/leads', protect, authorize(UserRole.BUSINESS_OWNER, UserRole.ADMIN), getBusinessLeads);
 
+router.get('/:id', optionalProtect, getOfferDetails);
+
+// Protected routes
 router.post('/', protect, authorize(UserRole.BUSINESS_OWNER, UserRole.ADMIN), createOffer);
 router.put('/:id', protect, authorize(UserRole.BUSINESS_OWNER, UserRole.ADMIN), updateOffer);
 router.delete('/:id', protect, authorize(UserRole.BUSINESS_OWNER, UserRole.ADMIN), deleteOffer);

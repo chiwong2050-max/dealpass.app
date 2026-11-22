@@ -80,7 +80,7 @@ const Privacy = () => {
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">5. Contact us</h2>
                     <p>
                         Questions about this policy or your data? Please reach out through our{' '}
-                        <Link to="/about" className="text-blue-600 underline dark:text-blue-400">support page</Link>{' '}
+                        <Link to="/contact" className="text-blue-600 underline dark:text-blue-400">contact page</Link>{' '}
                         and we will be happy to help.
                     </p>
                 </section>

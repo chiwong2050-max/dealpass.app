@@ -287,13 +287,10 @@ export const listBusinesses = async (req: Request, res: Response, next: NextFunc
 };
 
 // ... keep existing exports (upgradeToPro, exportBusinessReport, getBusinessCustomers, getBusinessAnalytics)
-export const upgradeToPro = async (req: Request, res: Response, next: NextFunction) => {
-  const userId = (req as any).user?.id;
-  if (!userId) return next(new UnauthorizedError('User not authenticated.'));
-  try {
-    const user = await prisma.user.update({ where: { id: userId }, data: { userTier: 'PREMIUM' as any } });
-    res.status(200).json({ message: 'Subscription upgraded successfully to PRO!', userTier: user.userTier });
-  } catch (error) { next(new InternalServerError('Failed to upgrade subscription.')); }
+// Paid plans are not connected to a real payment provider yet, so business
+// owners cannot self-upgrade. This always returns 503 until payments are wired up.
+export const upgradeToPro = async (_req: Request, res: Response) => {
+  return res.status(503).json({ message: 'Paid plans coming soon' });
 };
 
 export const exportBusinessReport = async (req: Request, res: Response, next: NextFunction) => {

@@ -11,9 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
+import { useRegion } from '@/contexts/RegionContext';
 
 const OffersPage = () => {
   const { user } = useAuth();
+  const { region } = useRegion();
   const [searchParams] = useSearchParams();
   const initialCity = searchParams.get('city') || '';
   
@@ -127,7 +129,7 @@ const OffersPage = () => {
     navigator.geolocation.getCurrentPosition(
         async (position) => {
             try {
-                const detectedCity = 'Melbourne'; 
+                const detectedCity = region.cities[0]; 
                 setLocationTerm(detectedCity);
                 toast.success(`Located: ${detectedCity}`);
                 // Will trigger fetch via locationTerm effect if I had one, but manual trigger here is safer

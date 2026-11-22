@@ -117,7 +117,7 @@ const UserSubscription = () => {
        {/* Social Proof */}
        <div className="max-w-2xl mx-auto text-center pt-8 border-t">
             <p className="italic text-gray-500">"I saved $50 on my first dinner out. The membership paid for itself immediately."</p>
-            <p className="text-sm font-bold mt-2">- Sarah J., Melbourne</p>
+            <p className="text-sm font-bold mt-2">- Sarah J.</p>
        </div>
     </div>
   );

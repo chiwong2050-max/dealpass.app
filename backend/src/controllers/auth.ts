@@ -9,8 +9,8 @@ import { config } from '../config';
 // Validation Schemas
 const signupSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(6),
-  name: z.string().min(1),
+  password: z.string().min(10, 'Password must be at least 10 characters long.'),
+  name: z.string().max(80).optional(),
   referralCode: z.string().optional(),
 });
 
@@ -18,6 +18,17 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
 });
+
+// Strip HTML tags and control characters from free-text input (e.g. names) so a
+// stored value can never carry a stored-XSS payload such as <script> or <img onerror>.
+const sanitizeText = (value?: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const cleaned = value
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\u0000-\u001F\u007F]/g, '')
+    .trim();
+  return cleaned.length ? cleaned.slice(0, 80) : undefined;
+};
 
 // Constants for replacement of Enums
 const UserTier = { FREE: 'FREE', PROMO: 'PROMO', PREMIUM: 'PREMIUM' };
@@ -32,11 +43,14 @@ const generateReferralCode = (name: string) => {
 };
 
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
-  const { email, password, name, referralCode: referredByCode } = req.body;
+  const validation = signupSchema.safeParse(req.body);
 
-  if (!email || !password) {
-    return next(new BadRequestError('Email and password are required.'));
+  if (!validation.success) {
+    return next(new BadRequestError(validation.error.errors[0].message));
   }
+
+  const { email, password, referralCode: referredByCode } = validation.data;
+  const name = sanitizeText(validation.data.name);
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -213,7 +227,8 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
     return next(new UnauthorizedError('User not authenticated.'));
   }
 
-  const { name, city, country, suburb } = req.body;
+  const { city, country, suburb } = req.body;
+  const name = sanitizeText(req.body.name);
 
   try {
     const user = await prisma.user.update({
@@ -229,26 +244,10 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const upgradeToPremium = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userId = (req as any).user?.id;
-    if (!userId) {
-      return next(new UnauthorizedError('User not authenticated.'));
-    }
-
-    const user = await prisma.user.update({
-      where: { id: userId },
-      data: { userTier: UserTier.PREMIUM as any }
-    });
-
-    res.status(200).json({
-      message: 'Successfully upgraded to Premium!',
-      user: { id: user.id, userTier: user.userTier }
-    });
-  } catch (error) {
-    console.error('Upgrade user error:', error);
-    next(new InternalServerError('Failed to upgrade user.'));
-  }
+// Paid plans are not connected to a real payment provider yet, so users cannot
+// self-upgrade. This always returns 503 until a payment provider is wired up.
+export const upgradeToPremium = async (_req: Request, res: Response) => {
+  return res.status(503).json({ message: 'Paid plans coming soon' });
 };
 
 export const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
@@ -319,8 +318,39 @@ export const rewardSocialShare = async (req: Request, res: Response, next: NextF
             return next(new UnauthorizedError('User not authenticated.'));
         }
 
-        const { platform } = req.body;
-        
+        const { platform } = req.body || {};
+        if (!platform || typeof platform !== 'string') {
+            return next(new BadRequestError('A platform is required to claim a share reward.'));
+        }
+
+        // Server-side guard: only one reward per platform per calendar day.
+        // The client cannot bypass this because the check runs against stored transactions.
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const todaysShares = await prisma.creditTransaction.findMany({
+            where: {
+                userId,
+                source: CreditTransactionSource.SOCIAL_SHARE as any,
+                createdAt: { gte: startOfDay },
+            },
+            select: { metadata: true },
+        });
+
+        const alreadyClaimed = todaysShares.some((tx) => {
+            try {
+                return JSON.parse(tx.metadata || '{}').platform === platform;
+            } catch {
+                return false;
+            }
+        });
+
+        if (alreadyClaimed) {
+            return res.status(429).json({
+                message: `You have already earned the ${platform} share bonus today. Try again tomorrow.`,
+            });
+        }
+
         const rewardConfig = await prisma.platformConfig.findUnique({ where: { key: 'social_share_reward' } });
         const rewardAmount = rewardConfig ? parseInt(rewardConfig.value) : 10;
 

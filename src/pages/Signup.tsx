@@ -30,7 +30,7 @@ const Signup = () => {
           <CardTitle className="text-2xl text-center">Join DealPass</CardTitle>
           <div className="flex justify-center mt-2">
              <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full flex items-center">
-                <Sparkles className="w-3 h-3 mr-1" /> GET 50 FREE CREDITS
+                <Sparkles className="w-3 h-3 mr-1" /> GET 10 FREE CREDITS
              </span>
           </div>
           <CardDescription className="text-center mt-2">
@@ -70,8 +70,10 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={10}
                 disabled={loading}
               />
+              <p className="text-xs text-gray-500">At least 10 characters.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="referralCode">Referral Code (Optional)</Label>

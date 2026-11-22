@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRegion } from '@/contexts/RegionContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Handshake, Sparkles, TrendingUp, Crown, Info } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Label } from '@/components/ui/label';
 
 const BusinessSubscription = () => {
   const { user } = useAuth();
+  const { region } = useRegion();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   const isPro = user?.userTier === 'PREMIUM';
@@ -17,7 +19,7 @@ const BusinessSubscription = () => {
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Partner Plans</h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Melbourne Launch Special: First 50 partners join free forever (Foundation Status).
+          Launch Special: First 50 partners in {region.name} join free forever (Foundation Status).
         </p>
       </div>
 
@@ -53,7 +55,7 @@ const BusinessSubscription = () => {
                 <CardTitle className="text-2xl flex items-center gap-2">
                     <Crown className="h-5 w-5 text-yellow-500" /> Foundation Partner
                 </CardTitle>
-                <CardDescription>Exclusive for early adopters in Melbourne.</CardDescription>
+                <CardDescription>Exclusive for early adopters in {region.name}.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 flex-grow">
                 <div>

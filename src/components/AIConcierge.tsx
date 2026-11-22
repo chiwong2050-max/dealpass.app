@@ -24,7 +24,7 @@ const AIConcierge = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: "Hi! I'm your DealPass Advisor. 🤖\n\nAsk me things like:\n• \"Find family deals in Melbourne\"\n• \"Best massage offers near me\"\n• \"Report an issue\"" }
+    { role: 'bot', content: "Hi! I'm your DealPass Advisor. 🤖\n\nAsk me things like:\n• \"Find family deals near me\"\n• \"Best massage offers near me\"\n• \"Report an issue\"" }
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const [chatState, setChatState] = useState<ChatState>('idle');
