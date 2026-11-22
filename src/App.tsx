@@ -38,6 +38,7 @@ const ScanRedeem = lazy(() => import("./pages/ScanRedeem"));
 const StaffTools = lazy(() => import("./pages/StaffTools"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 const queryClient = new QueryClient();
 
