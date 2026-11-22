@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums removed and replaced with String type in models below for SQLite compatibility.
+// Use application-level validation (Zod/TypeScript enums) to enforce these values.
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  passwordHash     String
+  name             String?
+  role             String    @default("USER") // Enum: USER, BUSINESS_OWNER, ADMIN
+  userTier         String    @default("FREE") // Enum: FREE, PROMO, PREMIUM
+  creditBalance    Int       @default(0)
+  referralCode     String    @unique
+  referredByUserId String?
+  city             String?
+  country          String?
+  suburb           String?
+  promoExpiresAt   DateTime?
+  emailVerified    Boolean   @default(false)
+  status           String?
+  lastActiveAt     DateTime?
+  birthdate        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  business           Business?
+  unlockedOffers     UnlockedOffer[]
+  redemptions        Redemption[]
+  creditTransactions CreditTransaction[]
+  pushSubscriptions  PushSubscription[]
+  notifications      NotificationQueue[]
+}
+
+model Business {
+  id            String   @id @default(uuid())
+  ownerUserId   String   @unique
+  owner         User     @relation(fields: [ownerUserId], references: [id])
+  legalName     String
+  tradingName   String
+  description   String?
+  address       String?
+  city          String
+  country       String
+  phone         String?
+  email         String
+  website       String?
+  logoUrl       String?
+  coverImageUrl String?
+  categoryTags  String // Stored as comma-separated string for SQLite
+  status        String   @default("PENDING_APPROVAL") // Enum: PENDING_APPROVAL, ACTIVE, SUSPENDED, REJECTED
+  avgStarRating Float?   @default(0)
+  totalReviews  Int?     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  offers         Offer[]
+  unlockedOffers UnlockedOffer[]
+  redemptions    Redemption[]
+}
+
+model Offer {
+  id                       String   @id @default(uuid())
+  businessId               String
+  business                 Business @relation(fields: [businessId], references: [id])
+  title                    String
+  shortDescription         String
+  longDescription          String?
+  imageUrl                 String?
+  externalUrl              String?
+  creditCost               Int      @default(1)
+  leadCost                 Int      @default(0)
+  validFrom                DateTime
+  validTo                  DateTime
+  totalLimit               Int?
+  dailyLimit               Int?
+  perUserLimit             Int      @default(1)
+  primaryPromotionTypeCode String
+  status                   String   @default("DRAFT") // Enum: DRAFT, ACTIVE, PAUSED, ARCHIVED
+  isPremium                Boolean  @default(false)
+
+  discountDetails    String? // JSON
+  timeDetails        String? // JSON
+  eligibilityDetails String? // JSON
+  aiModerationResult String? // JSON
+  validDays          String?
+  publicUrlSlug      String? @unique
+
+  unlockCount     Int @default(0)
+  redemptionCount Int @default(0)
+  viewCount       Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unlockedOffers UnlockedOffer[]
+  redemptions    Redemption[]
+}
+
+model UnlockedOffer {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  offerId          String
+  offer            Offer     @relation(fields: [offerId], references: [id])
+  businessId       String
+  business         Business  @relation(fields: [businessId], references: [id])
+  uniqueCouponCode String    @unique
+  qrCodeData       String
+  isRedeemed       Boolean   @default(false)
+  redeemedAt       DateTime?
+  expiresAt        DateTime
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  redemptions Redemption[]
+}
+
+model Redemption {
+  id              String   @id @default(uuid())
+  unlockedOfferId String
+  unlockedOffer   UnlockedOffer @relation(fields: [unlockedOfferId], references: [id])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id])
+  offerId         String
+  offer           Offer    @relation(fields: [offerId], references: [id])
+  status          String // Enum: SUCCESS, FAILED
+  source          String
+  createdAt       DateTime @default(now())
+}
+
+model CreditTransaction {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  type           String // Enum: EARN, SPEND
+  source         String // Enum: SIGNUP_BONUS, REDEMPTION_UNLOCK, etc
+  amount         Int
+  relatedOfferId String?
+  metadata       String? // JSON
+  createdAt      DateTime @default(now())
+}
+
+model PlatformConfig {
+  key         String  @id
+  value       String
+  description String?
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  endpoint  String
+  keys      String // JSON stringified
+  createdAt DateTime @default(now())
+}
+
+model NotificationQueue {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  body      String
+  data      String? // JSON string
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,78 @@
+{
+  "nav": {
+    "login": "Login",
+    "logout": "Logout",
+    "browse_deals": "Browse Deals",
+    "my_dashboard": "My Dashboard",
+    "join_club": "Join the Club",
+    "for_business": "For Business",
+    "offers": "Offers",
+    "about": "About",
+    "resources": "Resources"
+  },
+  "hero": {
+    "title_start": "Unlock Your City's",
+    "title_end": "Best Secrets.",
+    "subtitle": "Join the club for exclusive savings at local favorites.",
+    "benefit_1": "🍔 2-for-1 Dining",
+    "benefit_2": "💆 50% Off Spas",
+    "benefit_3": "🎢 Family Fun",
+    "cta_browse": "Browse All Deals",
+    "cta_find": "Find Deals Near Me"
+  },
+  "categories": {
+    "eat": "Eat",
+    "relax": "Relax",
+    "fix": "Fix",
+    "stay": "Stay",
+    "play": "Play"
+  },
+  "home": {
+    "global_reach": "LIVE IN CITIES ACROSS THE GLOBE",
+    "how_it_works": "How it Works for You",
+    "step_1_title": "Get Free Credits",
+    "step_1_desc": "Sign up in seconds. You get 50 Free Credits instantly to start unlocking deals immediately. No credit card required.",
+    "step_2_title": "Unlock & Save",
+    "step_2_desc": "Find a deal you love. Use credits to unlock the coupon. Show your phone at the venue to save $$$.",
+    "step_3_title": "Earn More",
+    "step_3_desc": "Running low? Earn more credits for free by sharing with friends, or upgrade to Membership for unlimited access.",
+    "value_title": "Not Just Cheap Eats",
+    "value_subtitle": "We cover your whole lifestyle. From your gym membership to your weekend getaway.",
+    "biz_title": "Stop Paying for Clicks.",
+    "biz_subtitle": "We fill your empty slots (off-peak times) with high-intent customers who are ready to buy."
+  },
+  "business": {
+    "dashboard": {
+      "title": "Dashboard",
+      "impressions": "Impressions",
+      "leads": "Total Leads",
+      "redemptions": "Redemptions",
+      "traffic_source": "Traffic Source",
+      "quick_redeem": "Quick Redeem",
+      "verify_desc": "Verify customer coupon code.",
+      "verify_btn": "Verify Code",
+      "scan_btn": "Scan Camera",
+      "profile_summary": "Profile Summary",
+      "account_status": "Account Status",
+      "business_name": "Business Name",
+      "manage_sub": "Manage Subscription & Billing",
+      "edit_profile": "Edit Profile",
+      "save_changes": "Save Changes",
+      "recent_leads": "Recent Leads",
+      "loyal_customers": "Loyal Customers",
+      "your_offers": "Your Offers",
+      "create_offer": "Create Offer",
+      "export": "Export CSV",
+      "no_leads": "No leads yet. Create more offers!",
+      "mark_redeemed": "Mark Redeemed"
+    },
+    "offers": {
+      "status_active": "Active",
+      "status_draft": "Draft",
+      "activate": "Activate",
+      "promote": "Promote",
+      "boost": "Boost",
+      "duplicate": "Duplicate"
+    }
+  }
+}
