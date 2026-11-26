@@ -3,6 +3,7 @@ import { z } from 'zod';
 import prisma from '../prisma';
 import { hashPassword, comparePassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
+import { verifyMagicToken } from '../utils/magicLink';
 import { BadRequestError, UnauthorizedError, InternalServerError, NotFoundError } from '../utils/errors';
 import { config } from '../config';
 
@@ -177,6 +178,50 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   } catch (error) {
     console.error('Login error:', error);
     next(new InternalServerError('Failed to log in.'));
+  }
+};
+
+export const magicLogin = async (req: Request, res: Response, next: NextFunction) => {
+  const token =
+    typeof req.body?.token === 'string'
+      ? req.body.token
+      : typeof req.query?.token === 'string'
+        ? req.query.token
+        : '';
+
+  if (!token) {
+    return next(new BadRequestError('A sign-in link token is required.'));
+  }
+
+  const userId = verifyMagicToken(token);
+  if (!userId) {
+    return next(new UnauthorizedError('This sign-in link is invalid or has expired.'));
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return next(new UnauthorizedError('This sign-in link is invalid or has expired.'));
+    }
+
+    const sessionToken = generateToken({ userId: user.id, role: user.role });
+
+    res.status(200).json({
+      message: 'Signed in successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        userTier: user.userTier,
+        creditBalance: user.creditBalance,
+        referralCode: user.referralCode,
+      },
+      token: sessionToken,
+    });
+  } catch (error) {
+    console.error('Magic login error:', error);
+    next(new InternalServerError('Failed to sign in with the magic link.'));
   }
 };
 

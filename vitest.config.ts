@@ -8,6 +8,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    // Frontend tests only; backend tests run under backend/vitest.config.ts.
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     css: true,
   },
   resolve: {

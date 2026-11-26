@@ -25,6 +25,9 @@ dev-dist
 *.sqlite-journal
 data/
 backend/prisma/data/
+# Isolated database used by the backend test suite
+backend/.test-data/
+.test-data/
 
 # Editor directories and files
 .vscode/*

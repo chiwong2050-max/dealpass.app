@@ -20,6 +20,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
   signup: (email: string, password: string, name?: string, referralCode?: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
@@ -99,6 +100,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [handleAuthSuccess]);
 
+  const loginWithToken = useCallback(async (magicToken: string) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/magic-login', { token: magicToken });
+      handleAuthSuccess(response.data.user, response.data.token);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'This sign-in link is invalid or has expired.';
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [handleAuthSuccess]);
+
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
@@ -113,11 +128,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     token,
     isAuthenticated: !!user,
     login,
+    loginWithToken,
     signup,
     logout,
     loading,
     loadUser,
-  }), [user, token, login, signup, logout, loading, loadUser]);
+  }), [user, token, login, loginWithToken, signup, logout, loading, loadUser]);
 
   return (
     <AuthContext.Provider value={authContextValue}>

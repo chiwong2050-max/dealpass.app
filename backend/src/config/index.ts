@@ -11,6 +11,10 @@ const port = Number(process.env.PORT) || 3000;
 // Set HOST=0.0.0.0 only if you intentionally want to expose the app directly.
 const host = process.env.HOST || '127.0.0.1';
 
+// Server-rendered public pages (deal / business / city / post) stay out of search
+// results until this flag is switched on. Defaults to off.
+const publicPagesIndexing = process.env.PUBLIC_PAGES_INDEXING === 'true';
+
 export const config = {
   port,
   host,
@@ -19,6 +23,8 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL,
   // Public site URL used for canonical links, sitemap.xml and robots.txt.
   siteUrl: process.env.SITE_URL || `http://localhost:${port}`,
+  // When false, every server-rendered public page emits <meta name="robots" content="noindex">.
+  publicPagesIndexing,
 };
 
 // Validate essential environment variables

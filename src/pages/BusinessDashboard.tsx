@@ -15,7 +15,6 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createSlug } from '@/utils/slugs';
-import QRCode from 'qrcode';
 import QrScanner from '@/components/QrScanner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTranslation } from 'react-i18next';
@@ -43,7 +42,6 @@ const BusinessDashboard = () => {
 
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [boosting, setBoosting] = useState(false);
-  const [qrCodeData, setQrCodeData] = useState('');
 
   // Edit Profile Form
   const [editForm, setEditForm] = useState({
@@ -267,23 +265,12 @@ const BusinessDashboard = () => {
 
   // ... (Keep Boost/Promote logic)
   const openBoostModal = (offer: Offer) => { setSelectedOffer(offer); setBoostModalOpen(true); };
-  const openPromoteModal = async (offer: Offer) => {
+  const openPromoteModal = (offer: Offer) => {
     setSelectedOffer(offer);
     setPromoteModalOpen(true);
-    try {
-        const url = getSmartLink(offer);
-        const qr = await QRCode.toDataURL(url, { errorCorrectionLevel: 'H', width: 300 });
-        setQrCodeData(qr);
-    } catch(err) { console.error("QR Generation failed", err); }
-  }
-  const downloadQrCode = () => {
-    if (!qrCodeData) return;
-    const link = document.createElement('a');
-    link.href = qrCodeData;
-    link.download = `qrcode-${selectedOffer?.publicUrlSlug || 'deal'}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  };
+  const copyToClipboard = (value: string, message = 'Copied!') => {
+    navigator.clipboard.writeText(value).then(() => toast.success(message)).catch(() => toast.error('Copy failed'));
   };
   const handleConfirmBoost = async () => {
     setBoosting(true);
@@ -294,10 +281,12 @@ const BusinessDashboard = () => {
     setSelectedOffer(null);
   };
   const handleRetarget = async (customer: any) => { toast.success(`Promotion sent to ${customer.user.name}! (Simulated)`); };
-  const getSmartLink = (offer: Offer) => {
-     const slugId = (offer as any).publicUrlSlug || createSlug(offer.title, offer.id);
-     return `${window.location.origin}/deal/${slugId}?source=qr`;
-  };
+  const getSlugId = (offer: Offer) => (offer as any).publicUrlSlug || createSlug(offer.title, offer.id);
+  const getPublicDealUrl = (offer: Offer) => `${window.location.origin}/deal/${getSlugId(offer)}`;
+  // QR is rendered server-side (see GET /qr/:slug) so it always points at the live page.
+  const getQrPngUrl = (offer: Offer) => `${window.location.origin}/qr/${getSlugId(offer)}.png`;
+  const getBadgeSnippet = (offer: Offer) =>
+    `<a href="${getPublicDealUrl(offer)}" style="display:inline-block;padding:8px 14px;border-radius:999px;background:#2563eb;color:#fff;font-family:sans-serif;font-weight:700;text-decoration:none">Find our deals on DealPass</a>`;
 
   if (loading) {
     return (
@@ -627,29 +616,62 @@ const BusinessDashboard = () => {
       </Dialog>
 
       <Dialog open={promoteModalOpen} onOpenChange={setPromoteModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Share2 className="h-5 w-5 text-primary" /> Promote Offer</DialogTitle>
-            <DialogDescription>Share this offer anywhere. We track who scans/clicks it.</DialogDescription>
+            <DialogTitle className="flex items-center gap-2"><Share2 className="h-5 w-5 text-primary" /> Share this deal</DialogTitle>
+            <DialogDescription>Copy the link, share it, or print the QR code for your counter.</DialogDescription>
           </DialogHeader>
           {selectedOffer && (
             <div className="py-4 space-y-6">
+                {/* Counter QR, rendered server-side so it always points at the live page */}
                 <div className="flex flex-col items-center p-4 bg-white border-2 border-dashed rounded-xl">
-                     {qrCodeData ? <img src={qrCodeData} alt="Offer QR" className="w-40 h-40 object-contain" /> : <div className="bg-gray-200 w-40 h-40 flex items-center justify-center rounded-lg mb-2"><QrCode className="w-20 h-20 text-gray-400" /></div>}
-                     <p className="text-xs font-bold text-center mt-2">Scan to View Deal</p>
+                     <img src={getQrPngUrl(selectedOffer)} alt="Offer QR code" className="w-40 h-40 object-contain" />
+                     <p className="text-xs font-bold text-center mt-2">Scan to view this deal</p>
                 </div>
+
+                {/* Copy link */}
                 <div className="space-y-2">
-                     <p className="text-sm font-medium">Smart Link</p>
+                     <p className="text-sm font-medium">Deal link</p>
                      <div className="flex gap-2">
-                         <Input readOnly value={getSmartLink(selectedOffer)} className="bg-gray-50 font-mono text-xs" />
-                         <Button size="icon" variant="outline" onClick={() => { navigator.clipboard.writeText(getSmartLink(selectedOffer)); toast.success("Copied!"); }}><Copy className="h-4 w-4" /></Button>
+                         <Input readOnly value={getPublicDealUrl(selectedOffer)} className="bg-gray-50 font-mono text-xs" />
+                         <Button size="icon" variant="outline" onClick={() => copyToClipboard(getPublicDealUrl(selectedOffer), 'Link copied!')}><Copy className="h-4 w-4" /></Button>
+                     </div>
+                </div>
+
+                {/* One-tap share links */}
+                <div className="space-y-2">
+                     <p className="text-sm font-medium">Share</p>
+                     <div className="grid grid-cols-3 gap-2">
+                         <Button asChild variant="outline" size="sm">
+                             <a href={`https://wa.me/?text=${encodeURIComponent(`Check out this deal: ${selectedOffer.title} ${getPublicDealUrl(selectedOffer)}`)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                         </Button>
+                         <Button asChild variant="outline" size="sm">
+                             <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getPublicDealUrl(selectedOffer))}`} target="_blank" rel="noopener noreferrer">Facebook</a>
+                         </Button>
+                         <Button asChild variant="outline" size="sm">
+                             <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(getPublicDealUrl(selectedOffer))}&text=${encodeURIComponent(selectedOffer.title)}`} target="_blank" rel="noopener noreferrer">X</a>
+                         </Button>
+                     </div>
+                </div>
+
+                {/* Badge snippet for the business website */}
+                <div className="space-y-2">
+                     <p className="text-sm font-medium">“Find our deals on DealPass” badge</p>
+                     <p className="text-xs text-gray-500">Paste this snippet on your website to link customers to your deals.</p>
+                     <div className="flex gap-2 items-start">
+                         <textarea readOnly value={getBadgeSnippet(selectedOffer)} rows={2} className="flex-1 text-xs font-mono bg-gray-50 border rounded-md p-2 resize-none" />
+                         <Button size="icon" variant="outline" onClick={() => copyToClipboard(getBadgeSnippet(selectedOffer), 'Badge code copied!')}><Copy className="h-4 w-4" /></Button>
                      </div>
                 </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setPromoteModalOpen(false)}>Close</Button>
-            <Button className="gap-2" onClick={downloadQrCode}> <Download className="w-4 h-4"/> Download QR</Button>
+            {selectedOffer && (
+                <Button className="gap-2" asChild>
+                    <a href={getQrPngUrl(selectedOffer)} download={`qr-${getSlugId(selectedOffer)}.png`}> <Download className="w-4 h-4"/> Download QR</a>
+                </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -8,6 +8,21 @@ interface ModerationResult {
 const BANNED_KEYWORDS = ['scam', 'xxx', 'illegal', 'drug', 'fake'];
 const SPAM_KEYWORDS = ['free money', 'click here', '100% free', 'winner', 'lottery'];
 
+// Family-safe / AdSense-safe blocklist. DealPass must never carry gambling,
+// adult or alcohol-promotion content. Matched as whole words so that, e.g.,
+// "better" does not trip the "bet" rule.
+const BLOCKED_CATEGORY_WORDS = [
+  // Gambling
+  'casino', 'poker', 'gambling', 'betting', 'wager', 'roulette', 'blackjack',
+  'jackpot', 'sportsbook', 'bookmaker', 'slot machine',
+  // Adult
+  'porn', 'porno', 'escort', 'nude', 'nudity', 'onlyfans', 'brothel', 'strip club',
+  // Alcohol promotion
+  'alcohol', 'beer', 'wine', 'vodka', 'whisky', 'whiskey', 'tequila', 'champagne',
+  'cocktail', 'liquor', 'happy hour', 'pub crawl',
+];
+const BLOCKED_CATEGORY_PATTERN = new RegExp(`\\b(${BLOCKED_CATEGORY_WORDS.join('|')})\\b`, 'i');
+
 export const moderateOfferContent = async (
   title: string,
   description: string,
@@ -26,6 +41,15 @@ export const moderateOfferContent = async (
       status: 'REJECTED',
       score: 0,
       reasoning: ['Contains prohibited keywords (Safety Violation).']
+    };
+  }
+
+  // 1b. Family-safe category check (Block gambling / adult / alcohol promos).
+  if (BLOCKED_CATEGORY_PATTERN.test(combinedText)) {
+    return {
+      status: 'REJECTED',
+      score: 0,
+      reasoning: ['Contains prohibited category keywords (Family-safe violation).']
     };
   }
 
@@ -99,6 +123,14 @@ export const moderateBusinessProfile = async (
       status: 'REJECTED',
       score: 0,
       reasoning: ['Business profile contains prohibited keywords.']
+    };
+  }
+
+  if (BLOCKED_CATEGORY_PATTERN.test(combinedText)) {
+    return {
+      status: 'REJECTED',
+      score: 0,
+      reasoning: ['Business profile contains prohibited category keywords (Family-safe violation).']
     };
   }
 

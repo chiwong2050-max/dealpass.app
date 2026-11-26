@@ -11,6 +11,7 @@ import businessRoutes from './routes/businesses';
 import settingsRoutes from './routes/settings';
 import supportRoutes from './routes/support';
 import notificationRoutes from './routes/notifications';
+import publicRoutes from './routes/public';
 import { ApiError } from './utils/errors';
 
 const app = express();
@@ -90,6 +91,7 @@ const authLimiter = rateLimit({
 
 // Middleware
 app.use(express.json()); // For parsing application/json
+app.use(express.urlencoded({ extended: false })); // For parsing the posting-flow HTML form
 
 // CORS: only allow the DealPass production origins (plus the configured SITE_URL
 // and localhost for development). No wildcard.
@@ -150,6 +152,10 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok', message: 'DealPass backend is running!' });
 });
 
+// Server-rendered public pages (deal / business / city / post) and the QR image.
+// Mounted before the SPA fallback so crawlers get plain HTML, not the app shell.
+app.use(publicRoutes);
+
 // Catch-all for undefined API routes
 app.use('/api', (req: Request, res: Response, next: NextFunction) => {
   next(new ApiError(404, `Not Found - ${req.originalUrl}`));
@@ -203,7 +209,7 @@ const startServer = () => {
   });
 };
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && require.main === module) {
   startServer();
 }
 
