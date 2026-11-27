@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import api from '@/services/api';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface User {
   id: string;
@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleAuthSuccess = useCallback((userData: User, jwtToken: string) => {
     localStorage.setItem('token', jwtToken);
@@ -41,8 +42,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userData);
     api.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
     toast.success('Authentication successful!');
-    navigate('/'); // Redirect to home or dashboard after successful auth
-  }, [navigate]);
+
+    // Send the user to their account dashboard, unless they were bounced here
+    // from a protected page (ProtectedRoute sets location.state.from) or an
+    // explicit ?next= target is present, in which case return them there.
+    const fromState = (location.state as
+      | { from?: { pathname?: string; search?: string; hash?: string } }
+      | null)?.from;
+    const nextParam = new URLSearchParams(location.search).get('next');
+    const destination =
+      nextParam ||
+      (fromState?.pathname
+        ? `${fromState.pathname}${fromState.search || ''}${fromState.hash || ''}`
+        : '/profile');
+
+    navigate(destination, { replace: true });
+  }, [navigate, location]);
 
   const loadUser = useCallback(async () => {
     // Only attempt to load if we have a token or to check valid session

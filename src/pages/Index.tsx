@@ -1,38 +1,18 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MapPin, Search, ChevronRight, Store, ArrowRight, LayoutDashboard, TrendingUp, CheckCircle2 } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Store, TrendingUp, CheckCircle2 } from "lucide-react";
 import Footer from "@/components/Footer";
-import RegionLanguageSelector from "@/components/RegionLanguageSelector";
+import SiteHeader from "@/components/SiteHeader";
 
 const Index = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       
-      {/* 1. SIMPLE HEADER */}
-      <header className="px-6 py-4 flex justify-between items-center bg-white dark:bg-gray-900 sticky top-0 z-10 border-b border-transparent shadow-sm">
-          <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-200 dark:shadow-none">D</div>
-              <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">DealPass</span>
-          </div>
-          
-          <div className="flex items-center gap-2 md:gap-4">
-             {/* If user is business owner, show dashboard link prominently */}
-             {isAuthenticated && (user?.role === 'BUSINESS_OWNER' || user?.role === 'ADMIN') && (
-                 <Link to="/business/dashboard">
-                    <Button variant="ghost" size="sm" className="hidden md:flex">
-                        <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
-                    </Button>
-                 </Link>
-             )}
-
-             {/* Restored Region/Language Selector */}
-             <RegionLanguageSelector />
-          </div>
-      </header>
+      {/* 1. SHARED HEADER (shows a clear signed-in state on mobile and desktop) */}
+      <SiteHeader />
 
       <main className="px-4 space-y-12 pb-8">
           
