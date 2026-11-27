@@ -10,6 +10,7 @@ import AIConcierge from "./components/AIConcierge";
 import InstallPWA from "./components/InstallPWA";
 import PushNotificationManager from "./components/PushNotificationManager";
 import BottomNav from "./components/BottomNav";
+import SiteHeader from "./components/SiteHeader";
 import { AuthProvider } from "./hooks/useAuth";
 import { RegionProvider } from "./contexts/RegionContext";
 
@@ -56,6 +57,7 @@ const AppContent = () => {
 
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${!hideNav ? 'pb-20 md:pb-0' : ''}`}>
+      {!hideNav && <SiteHeader />}
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Index />} />

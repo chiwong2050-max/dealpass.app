@@ -3,16 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Store, TrendingUp, CheckCircle2 } from "lucide-react";
 import Footer from "@/components/Footer";
-import SiteHeader from "@/components/SiteHeader";
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      
-      {/* 1. SHARED HEADER (shows a clear signed-in state on mobile and desktop) */}
-      <SiteHeader />
 
       <main className="px-4 space-y-12 pb-8">
           
